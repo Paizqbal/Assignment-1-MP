@@ -1,0 +1,101 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'PencuriMovie App',
+      home: Scaffold(
+          appBar: AppBar(
+              title: const Text('PencuriMovie App',
+                  style: TextStyle(fontSize: 40))),
+          body: const HomePage()),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  var movie = "", desc = "";
+  String selectMovie = "Action";
+  List<String> listMovie = [
+    "Action",
+    "Adventure",
+    "Animation",
+    "Horror",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Movies Search",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          DropdownButton(
+            itemHeight: 60,
+            value: selectMovie,
+            onChanged: (newValue) {
+              setState(() {
+                selectMovie = newValue.toString();
+              });
+            },
+            items: listMovie.map((selectMovie) {
+              return DropdownMenuItem(
+                value: selectMovie,
+                child: Text(
+                  selectMovie,
+                ),
+              );
+            }).toList(),
+          ),
+          ElevatedButton(onPressed: _getGenre, child: const Text("Search")),
+          Text(desc,
+              style:
+                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _getGenre() async {
+    var apikey = "be456d3e";
+    var url =
+        Uri.parse('https://www.omdbapi.com/?t=$selectMovie&apikey=$apikey');
+    var response = await http.get(url);
+    var rescode = response.statusCode;
+    if (rescode == 200) {
+      var jsonData = response.body;
+      var parsedJson = json.decode(jsonData);
+      setState(() {
+        var title = parsedJson["Title"];
+        var genre = parsedJson["Genre"];
+        var year = parsedJson["Year"];
+        var descs = parsedJson["Plot"];
+        var linkimg = parsedJson["Poster"];
+
+        desc =
+            "Search result for $selectMovie is $title \n\nThis movie genre is $genre and released in $year. \n\n$descs\n\n$linkimg";
+      });
+    } else {
+      setState(() {
+        desc = "No record";
+      });
+    }
+  }
+}
+
