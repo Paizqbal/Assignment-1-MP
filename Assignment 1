@@ -73,6 +73,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _getGenre() async {
+    AlertDialog alert = AlertDialog(
+      content: Row(children: [
+        CircularProgressIndicator(
+          backgroundColor: Colors.red,
+        ),
+        Container(margin: EdgeInsets.only(left: 7), child: Text("Loading...")),
+      ]),
+    );
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
     var apikey = "be456d3e";
     var url =
         Uri.parse('https://www.omdbapi.com/?t=$selectMovie&apikey=$apikey');
@@ -88,14 +103,17 @@ class _HomePageState extends State<HomePage> {
         var descs = parsedJson["Plot"];
         var linkimg = parsedJson["Poster"];
 
+        Navigator.pop(context);
         desc =
             "Search result for $selectMovie is $title \n\nThis movie genre is $genre and released in $year. \n\n$descs\n\n$linkimg";
       });
     } else {
       setState(() {
+        Navigator.pop(context);
         desc = "No record";
       });
     }
   }
 }
+
 
